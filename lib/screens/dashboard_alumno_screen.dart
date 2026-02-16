@@ -90,8 +90,8 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
   }
 
   Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
+    return Transform.translate(
+      offset: const Offset(0, 666),
       child: Row(
         children: [
           TabNavegacion(

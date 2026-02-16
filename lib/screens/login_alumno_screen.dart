@@ -49,7 +49,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
             ),
             
             const NubeDecorativa(
-              abajo: -40,
+              abajo: 100,
               derecha: -40,
               ancho: 256,
               opacidad: 0.4,
@@ -68,8 +68,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
                     const SizedBox(height: 32),
                     _buildBotonLogin(),
                     const SizedBox(height: 16),
-                    _buildLinkRegistro(),
-                    const SizedBox(height: 200),
+                    const SizedBox(height: 300),
                   ],
                 ),
               ),
@@ -96,6 +95,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
               ),
@@ -127,6 +127,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
         Text(
           '¡Bienvenido de nuevo a tu clase!',
           style: TextStyle(
+            // ignore: deprecated_member_use
             color: Colors.white.withOpacity(0.8),
             fontSize: 16,
           ),
@@ -155,6 +156,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
             child: Text(
               'Forgot?',
               style: TextStyle(
+                // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.9),
                 fontSize: 14,
               ),
@@ -186,32 +188,5 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
     );
   }
 
-  Widget _buildLinkRegistro() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          '¿Aún no tienes cuenta?',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.7),
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(width: 4),
-        GestureDetector(
-          onTap: () {
-          },
-          child: const Text(
-            'Regístrate',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
+
 }

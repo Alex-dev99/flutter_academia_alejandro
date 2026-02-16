@@ -66,6 +66,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                   Navigator.pushReplacementNamed(context, '/');
                 },
                 style: ElevatedButton.styleFrom(
+                  // ignore: deprecated_member_use
                   backgroundColor: const Color(0xFFA855F7).withOpacity(0.5),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
@@ -131,45 +132,9 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
     );
   }
 
-  Widget _buildTabs() {
-    return Transform.translate(
-      offset: const Offset(0, -48),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            TabNavegacion(
-              icono: Icons.calendar_month,
-              texto: 'Horario',
-              estaSeleccionado: _tabSeleccionado == 0,
-              colorSeleccionado: const Color(0xFF9333EA),
-              onTap: () => setState(() => _tabSeleccionado = 0),
-            ),
-            const SizedBox(width: 12),
-            TabNavegacion(
-              icono: Icons.group,
-              texto: 'Alumnos',
-              estaSeleccionado: _tabSeleccionado == 1,
-              colorSeleccionado: const Color(0xFF9333EA),
-              onTap: () => setState(() => _tabSeleccionado = 1),
-            ),
-            const SizedBox(width: 12),
-            TabNavegacion(
-              icono: Icons.domain,
-              texto: 'Aulas',
-              estaSeleccionado: _tabSeleccionado == 2,
-              colorSeleccionado: const Color(0xFF9333EA),
-              onTap: () => setState(() => _tabSeleccionado = 2),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildListaAlumnos() {
     return Transform.translate(
-      offset: const Offset(0, -48),
+      offset: const Offset(0, -100),
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Container(
@@ -217,6 +182,42 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+    Widget _buildTabs() {
+    return Transform.translate(
+      offset: const Offset(0, 450),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            TabNavegacion(
+              icono: Icons.calendar_month,
+              texto: 'Horario',
+              estaSeleccionado: _tabSeleccionado == 0,
+              colorSeleccionado: const Color(0xFF9333EA),
+              onTap: () => setState(() => _tabSeleccionado = 0),
+            ),
+            const SizedBox(width: 12),
+            TabNavegacion(
+              icono: Icons.group,
+              texto: 'Alumnos',
+              estaSeleccionado: _tabSeleccionado == 1,
+              colorSeleccionado: const Color(0xFF9333EA),
+              onTap: () => setState(() => _tabSeleccionado = 1),
+            ),
+            const SizedBox(width: 12),
+            TabNavegacion(
+              icono: Icons.domain,
+              texto: 'Aulas',
+              estaSeleccionado: _tabSeleccionado == 2,
+              colorSeleccionado: const Color(0xFF9333EA),
+              onTap: () => setState(() => _tabSeleccionado = 2),
+            ),
+          ],
         ),
       ),
     );

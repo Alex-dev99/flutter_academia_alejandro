@@ -35,26 +35,35 @@ class _LoginDocenteScreenState extends State<LoginDocenteScreen> {
           );
         }
       },
+      
       child: Scaffold(
         backgroundColor: const Color(0xFF05A3C7),
         body: Stack(
           children: [
+            const NubeDecorativa(
+              abajo: 150,
+              izquierda: -10,
+              ancho: 192,
+              opacidad: 0.4,
+            ),
             Positioned(
               bottom: 0,
-              left: 0,
+              right: 0,
               child: Image.asset(
                 'assets/images/teacher_illustration.png',
-                width: 192,
+                width: 250,
               ),
+              
             ),
-            const NubeDecorativa(abajo: -40, derecha: -40, ancho: 256, opacidad: 0.4),
+
+
             SafeArea(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   children: [
                     _buildHeader(context),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 50),
                     const Text(
                       'Log in docente',
                       style: TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
@@ -62,6 +71,7 @@ class _LoginDocenteScreenState extends State<LoginDocenteScreen> {
                     const SizedBox(height: 8),
                     Text(
                       '¡Bienvenido de nuevo!',
+                      // ignore: deprecated_member_use
                       style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16),
                     ),
                     const SizedBox(height: 40),
@@ -70,7 +80,7 @@ class _LoginDocenteScreenState extends State<LoginDocenteScreen> {
                     CampoTexto(etiqueta: 'Password', controlador: _passwordController, esPassword: true),
                     const SizedBox(height: 32),
                     _buildBotonLogin(),
-                    const SizedBox(height: 200),
+                    const SizedBox(height: 280),
                   ],
                 ),
               ),

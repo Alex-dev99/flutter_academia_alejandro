@@ -109,7 +109,7 @@ class HomeScreen extends StatelessWidget {
   Widget _buildIlustracion(BuildContext context) {
     return Image.asset(
       'assets/images/reading_illustration.png',
-      width: MediaQuery.of(context).size.width * 0.9,
+      width: 850,
       fit: BoxFit.contain,
     );
   }
