@@ -154,7 +154,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
             onTap: () {
             },
             child: Text(
-              'Forgot?',
+              '',
               style: TextStyle(
                 // ignore: deprecated_member_use
                 color: Colors.white.withOpacity(0.9),
