@@ -4,20 +4,14 @@ class TarjetaAlumno extends StatelessWidget {
   final String nombre; 
   final String id; 
   final String curso; 
-  final int asistencia; 
-  final Color colorAsistencia; 
-  final Color colorTextoAsistencia; 
-  final double nota; 
+
   
   const TarjetaAlumno({
     super.key,
     required this.nombre,
     required this.id,
     required this.curso,
-    required this.asistencia,
-    required this.colorAsistencia,
-    required this.colorTextoAsistencia,
-    required this.nota,
+
   });
 
   @override
@@ -106,32 +100,12 @@ class TarjetaAlumno extends StatelessWidget {
               
               Column(
                 children: [
-                  const Text(
-                    'ASISTENCIA',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+ 
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: colorAsistencia,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      '$asistencia%',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: colorTextoAsistencia,
-                      ),
                     ),
                   ),
                 ],
@@ -142,24 +116,8 @@ class TarjetaAlumno extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  const Text(
-                    'NOTA',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Color(0xFF6B7280),
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
                   const SizedBox(height: 4),
-                  Text(
-                    nota.toString(),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF9333EA),
-                    ),
-                  ),
+
                 ],
               ),
             ],

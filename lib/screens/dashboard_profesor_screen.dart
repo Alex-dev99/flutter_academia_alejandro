@@ -153,10 +153,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                 nombre: 'Ana García',
                 id: '2024-001',
                 curso: 'Programación Web',
-                asistencia: 95,
-                colorAsistencia: Color(0xFFECFDF5),
-                colorTextoAsistencia: Color(0xFF059669),
-                nota: 8.5,
+
               ),
               SizedBox(height: 16),
               
@@ -164,10 +161,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                 nombre: 'Luis Pérez',
                 id: '2024-002',
                 curso: 'Programación Web',
-                asistencia: 88,
-                colorAsistencia: Color(0xFFFFF7ED),
-                colorTextoAsistencia: Color(0xFFD97706),
-                nota: 7.8,
+
               ),
               SizedBox(height: 16),
               
@@ -175,10 +169,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                 nombre: 'María Sánchez',
                 id: '2024-003',
                 curso: 'Diseño Web',
-                asistencia: 92,
-                colorAsistencia: Color(0xFFECFDF5),
-                colorTextoAsistencia: Color(0xFF059669),
-                nota: 9.0,
+
               ),
             ],
           ),
