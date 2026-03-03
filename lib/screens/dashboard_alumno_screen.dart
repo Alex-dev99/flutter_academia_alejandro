@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
-import '../widgets/widgets.dart'; 
+import '../blocs/auth/auth_state.dart';
+import '../widgets/widgets.dart';
+import '../services/api_service.dart';
+
 class DashboardAlumnoScreen extends StatefulWidget {
   const DashboardAlumnoScreen({super.key});
 
@@ -11,24 +14,75 @@ class DashboardAlumnoScreen extends StatefulWidget {
 }
 
 class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
-  int _tabSeleccionado = 0; 
+  int _tabSeleccionado = 0;
+  List<dynamic> _horarios = [];
+  List<dynamic> _recibos = [];
+  bool _cargando = true;
+  String? _idAlumno;
+  String? _nombreAlumno;
+  String? _cursoAlumno;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    // Obtener datos del alumno del BLoC
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated && authState.usuario != null) {
+      _idAlumno = authState.usuario!['id'].toString();
+      _nombreAlumno = authState.usuario!['nombre'];
+      _cursoAlumno = authState.usuario!['curso_actual'];
+    }
+
+    if (_idAlumno == null) {
+      setState(() {
+        _cargando = false;
+      });
+      return;
+    }
+
+    // Cargar datos en paralelo
+    final idAlumn = int.parse(_idAlumno!);
+    final resultHorarios = await ApiService.getAlumnoHorarios(idAlumn);
+    final resultRecibos = await ApiService.getAlumnoRecibos(idAlumn);
+
+    setState(() {
+      _horarios = resultHorarios['horarios'] ?? [];
+      _recibos = resultRecibos['recibos'] ?? [];
+      _cargando = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FBFE),
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: _buildContenidoSegunTab(), 
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FBFE),
+          body: Column(
+            children: [
+              _buildHeader(state),
+              Expanded(
+                child: _cargando ? _buildCargando() : _buildContenidoSegunTab(),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(), 
+          bottomNavigationBar: _buildBottomNavigationBar(),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildCargando() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildHeader(AuthState state) {
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF05A3C7),
@@ -53,13 +107,18 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
                 child: const Icon(Icons.account_circle, color: Colors.white, size: 40),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Ana García',
-                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                    Text('ID: 2024-001', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text(_nombreAlumno ?? "Cargando...",
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    Text('ID: ${_idAlumno ?? "..."}',
+                        style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text(_cursoAlumno ?? "",
+                        style: const TextStyle(color: Colors.white70, fontSize: 11),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   ],
                 ),
               ),
@@ -108,10 +167,6 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
           icon: Icon(Icons.payments),
           label: 'Pagos',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.meeting_room),
-          label: 'Aulas',
-        ),
       ],
     );
   }
@@ -122,110 +177,96 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
         return _buildHorario();
       case 1:
         return _buildPagos();
-      case 2:
-        return _buildAulas();
       default:
         return _buildHorario();
     }
   }
 
   Widget _buildHorario() {
+    if (_horarios.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No hay horarios registrados',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Horario de Clases', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          TarjetaClase(
-            dia: 'Lunes',
-            hora: '10:00 - 12:00',
-            materia: 'HTML & CSS',
-            aula: 'Aula 101',
-            color: Color(0xFF05A3C7),
-          ),
-          SizedBox(height: 12),
-          TarjetaClase(
-            dia: 'Miércoles',
-            hora: '14:00 - 16:00',
-            materia: 'JavaScript',
-            aula: 'Aula 102',
-            color: Color(0xFF05A3C7),
-          ),
-          SizedBox(height: 12),
-          TarjetaClase(
-            dia: 'Viernes',
-            hora: '10:00 - 12:00',
-            materia: 'React',
-            aula: 'Aula 101',
-            color: Color(0xFF05A3C7),
-          ),
+        children: [
+          const Text('Horario de Clases', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ..._horarios.map((horario) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TarjetaClase(
+              dia: horario['dia_semana'] ?? '',
+              hora: '${horario['hora_inicio']} - ${horario['hora_fin']}',
+              materia: horario['materia'] ?? 'Materia',
+              aula: horario['aula_nombre'] ?? 'Aula',
+              color: const Color(0xFF05A3C7),
+            ),
+          )),
         ],
       ),
     );
   }
 
   Widget _buildPagos() {
+    if (_recibos.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.receipt, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No hay recibos registrados',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Estado de Pagos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          TarjetaPago(
-            concepto: 'Mensualidad Marzo',
-            monto: '\$150',
-            fecha: '15/03/2025',
-            estado: 'Pagado',
-          ),
-          SizedBox(height: 12),
-          TarjetaPago(
-            concepto: 'Mensualidad Abril',
-            monto: '\$150',
-            fecha: '15/04/2025',
-            estado: 'Pendiente',
-          ),
-          SizedBox(height: 12),
-          TarjetaPago(
-            concepto: 'Materiales',
-            monto: '\$50',
-            fecha: '10/04/2025',
-            estado: 'Pagado',
-          ),
+        children: [
+          const Text('Estado de Pagos', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          ..._recibos.map((recibo) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: TarjetaPago(
+              concepto: recibo['mes'] ?? 'Pago',
+              monto: '\$${recibo['importe']}',
+              fecha: _formatearFecha(recibo['fecha_emision']),
+              estado: recibo['estado'] ?? 'Desconocido',
+            ),
+          )),
         ],
       ),
     );
   }
 
-  Widget _buildAulas() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Aulas Disponibles', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          SizedBox(height: 16),
-          TarjetaAula(
-            nombre: 'Aula 101',
-            capacidad: '30 estudiantes',
-            equipamiento: 'Proyector, Pizarra',
-          ),
-          SizedBox(height: 12),
-          TarjetaAula(
-            nombre: 'Aula 102',
-            capacidad: '25 estudiantes',
-            equipamiento: 'Computadoras',
-          ),
-          SizedBox(height: 12),
-          TarjetaAula(
-            nombre: 'Lab. de Cómputo',
-            capacidad: '20 estudiantes',
-            equipamiento: 'PCs, Software especializado',
-          ),
-        ],
-      ),
-    );
+  String _formatearFecha(String? fecha) {
+    if (fecha == null || fecha.isEmpty) return 'N/A';
+    try {
+      final dateTime = DateTime.parse(fecha);
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
+    } catch (e) {
+      return fecha;
+    }
   }
 }
 

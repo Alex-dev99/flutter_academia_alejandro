@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
 import '../blocs/auth/auth_event.dart';
+import '../blocs/auth/auth_state.dart';
 import '../widgets/widgets.dart';
+import '../services/api_service.dart';
 
 class DashboardProfesorScreen extends StatefulWidget {
   const DashboardProfesorScreen({super.key});
@@ -12,26 +14,79 @@ class DashboardProfesorScreen extends StatefulWidget {
 }
 
 class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
-  int _tabSeleccionado = 1; 
+  int _tabSeleccionado = 1;
+  List<dynamic> _horarios = [];
+  List<dynamic> _alumnos = [];
+  List<dynamic> _aulas = [];
+  bool _cargando = true;
+  String? _idProfesor;
+  String? _nombreProfesor;
+  String? _materiasProfesor;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarDatos();
+  }
+
+  Future<void> _cargarDatos() async {
+    // Obtener datos del profesor del BLoC
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated && authState.usuario != null) {
+      _idProfesor = authState.usuario!['id'].toString();
+      _nombreProfesor = '${authState.usuario!['nombre']} ${authState.usuario!['apellidos']}';
+      _materiasProfesor = authState.usuario!['materias_imparte'];
+    }
+
+    if (_idProfesor == null) {
+      setState(() {
+        _cargando = false;
+      });
+      return;
+    }
+
+    // Cargar datos en paralelo
+    final idProf = int.parse(_idProfesor!);
+    final resultHorarios = await ApiService.getProfesorHorarios(idProf);
+    final resultAlumnos = await ApiService.getProfesorAlumnos(idProf);
+    final resultAulas = await ApiService.getAulas();
+
+    setState(() {
+      _horarios = resultHorarios['horarios'] ?? [];
+      _alumnos = resultAlumnos['alumnos'] ?? [];
+      _aulas = resultAulas['aulas'] ?? [];
+      _cargando = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: Column(
-        children: [
-          _buildHeader(),
-          _buildEstadisticas(),
-          Expanded(
-            child: _buildContenidoSegunTab(), 
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          body: Column(
+            children: [
+              _buildHeader(state),
+              _buildEstadisticas(),
+              Expanded(
+                child: _cargando ? _buildCargando() : _buildContenidoSegunTab(),
+              ),
+            ],
           ),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(), 
+          bottomNavigationBar: _buildBottomNavigationBar(),
+        );
+      },
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildCargando() {
+    return const Center(
+      child: CircularProgressIndicator(),
+    );
+  }
+
+  Widget _buildHeader(AuthState state) {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -43,7 +98,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 24, 24, 40), 
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
           child: Row(
             children: [
               Container(
@@ -53,12 +108,20 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                 child: const Icon(Icons.person, color: Colors.white, size: 32),
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Prof. Carlos Ruiz', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('Departamento de Tecnología', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                    Text(
+                      'Prof. ${_nombreProfesor ?? "..."}',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      _materiasProfesor ?? "Cargando...",
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ],
                 ),
               ),
@@ -68,6 +131,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
                   Navigator.pushReplacementNamed(context, '/');
                 },
                 style: ElevatedButton.styleFrom(
+                  // ignore: deprecated_member_use
                   backgroundColor: const Color(0xFFA855F7).withOpacity(0.5),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
@@ -87,37 +151,41 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
   }
 
   Widget _buildEstadisticas() {
+    int clasesEstaSemana = _horarios.length;
+    int totalAlumnos = _alumnos.length;
+    int aulasDisponibles = _aulas.length;
+
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24), 
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       child: Row(
-        children: const [
+        children: [
           Expanded(
             child: TarjetaEstadistica(
               icono: Icons.calendar_today,
-              colorIcono: Color(0xFF9333EA),
-              colorFondoIcono: Color(0xFFF5EEFF),
-              etiqueta: 'Clases esta semana',
-              valor: '4',
+              colorIcono: const Color(0xFF9333EA),
+              colorFondoIcono: const Color(0xFFF5EEFF),
+              etiqueta: 'Clases',
+              valor: clasesEstaSemana.toString(),
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: TarjetaEstadistica(
               icono: Icons.group,
-              colorIcono: Color(0xFF3B82F6),
-              colorFondoIcono: Color(0xFFEFF6FF),
-              etiqueta: 'Total de Alumnos',
-              valor: '5',
+              colorIcono: const Color(0xFF3B82F6),
+              colorFondoIcono: const Color(0xFFEFF6FF),
+              etiqueta: 'Alumnos',
+              valor: totalAlumnos.toString(),
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: TarjetaEstadistica(
               icono: Icons.domain,
-              colorIcono: Color(0xFF10B981),
-              colorFondoIcono: Color(0xFFECFDF5),
-              etiqueta: 'Aulas Disponibles',
-              valor: '3',
+              colorIcono: const Color(0xFF10B981),
+              colorFondoIcono: const Color(0xFFECFDF5),
+              etiqueta: 'Aulas',
+              valor: aulasDisponibles.toString(),
             ),
           ),
         ],
@@ -133,7 +201,7 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
           _tabSeleccionado = index;
         });
       },
-      type: BottomNavigationBarType.fixed, 
+      type: BottomNavigationBarType.fixed,
       selectedItemColor: const Color(0xFF9333EA),
       unselectedItemColor: Colors.grey,
       items: const [
@@ -167,99 +235,114 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
   }
 
   Widget _buildHorarioProfesor() {
+    if (_horarios.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.calendar_today, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No hay horarios registrados',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Mi Horario', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 24),
-          TarjetaClaseProfesor(
-            dia: 'Lunes',
-            hora: '10:00 - 12:00',
-            materia: 'Programación Web',
-            aula: 'Aula 101',
-            grupo: 'Grupo A',
-          ),
-          SizedBox(height: 16),
-          TarjetaClaseProfesor(
-            dia: 'Miércoles',
-            hora: '14:00 - 16:00',
-            materia: 'JavaScript Avanzado',
-            aula: 'Lab. Cómputo',
-            grupo: 'Grupo B',
-          ),
-          SizedBox(height: 16),
-          TarjetaClaseProfesor(
-            dia: 'Viernes',
-            hora: '08:00 - 10:00',
-            materia: 'React',
-            aula: 'Aula 102',
-            grupo: 'Grupo A',
-          ),
+        children: [
+          const Text('Mi Horario', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          ..._horarios.map((horario) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TarjetaClaseProfesor(
+              dia: horario['dia_semana'] ?? '',
+              hora: '${horario['hora_inicio']} - ${horario['hora_fin']}',
+              materia: horario['materia'] ?? 'Materia',
+              aula: horario['aula_nombre'] ?? 'Aula',
+              grupo: '${horario['alumno_nombre']} ${horario['alumno_apellidos']}',
+            ),
+          )),
         ],
       ),
     );
   }
 
   Widget _buildListaAlumnos() {
+    if (_alumnos.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.group, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No hay alumnos registrados',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Lista de Alumnos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 24),
-          TarjetaAlumno(
-            nombre: 'Ana García',
-            id: '2024-001',
-            curso: 'Programación Web',
-          ),
-          SizedBox(height: 16),
-          TarjetaAlumno(
-            nombre: 'Luis Pérez',
-            id: '2024-002',
-            curso: 'Programación Web',
-          ),
-          SizedBox(height: 16),
-          TarjetaAlumno(
-            nombre: 'María Sánchez',
-            id: '2024-003',
-            curso: 'Diseño Web',
-          ),
+        children: [
+          const Text('Lista de Alumnos', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          ..._alumnos.map((alumno) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TarjetaAlumno(
+              nombre: '${alumno['nombre']} ${alumno['apellidos']}',
+              id: alumno['id_alumno'].toString(),
+              curso: alumno['curso_actual'] ?? 'Curso',
+            ),
+          )),
         ],
       ),
     );
   }
 
   Widget _buildAulasProfesor() {
+    if (_aulas.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.domain, size: 64, color: Colors.grey.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'No hay aulas disponibles',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+            ),
+          ],
+        ),
+      );
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Text('Aulas Disponibles', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          SizedBox(height: 24),
-          TarjetaAulaProfesor(
-            nombre: 'Aula 101',
-            capacidad: '30',
-            equipamiento: 'Proyector, Pizarra',
-            horario: 'Libre: 12:00 - 14:00',
-          ),
-          SizedBox(height: 16),
-          TarjetaAulaProfesor(
-            nombre: 'Aula 102',
-            capacidad: '25',
-            equipamiento: 'Computadoras',
-            horario: 'Ocupado hasta 15:00',
-          ),
-          SizedBox(height: 16),
-          TarjetaAulaProfesor(
-            nombre: 'Lab. Cómputo',
-            capacidad: '20',
-            equipamiento: 'PCs, Software',
-            horario: 'Disponible todo el día',
-          ),
+        children: [
+          const Text('Aulas Disponibles', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 24),
+          ..._aulas.map((aula) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: TarjetaAulaProfesor(
+              nombre: aula['nombre'] ?? 'Aula',
+              capacidad: aula['capacidad']?.toString() ?? '0',
+              equipamiento: aula['descripcion'] ?? 'Sin descripción',
+              horario: 'Disponible',
+            ),
+          )),
         ],
       ),
     );

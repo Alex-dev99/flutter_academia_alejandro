@@ -97,4 +97,145 @@ class ApiService {
       };
     }
   }
+
+  // Obtener horarios del profesor
+  static Future<Map<String, dynamic>> getProfesorHorarios(int idProfesor) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/profesores_horarios.php?id_profesor=$idProfesor'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return {
+          'success': true,
+          'horarios': responseData['horarios'] ?? [],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Error al obtener horarios',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
+
+  // Obtener alumnos del profesor
+  static Future<Map<String, dynamic>> getProfesorAlumnos(int idProfesor) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/profesores_alumnos.php?id_profesor=$idProfesor'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return {
+          'success': true,
+          'alumnos': responseData['alumnos'] ?? [],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Error al obtener alumnos',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
+
+  // Obtener aulas
+  static Future<Map<String, dynamic>> getAulas() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/aulas.php'),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      // El endpoint aulas.php devuelve directamente un array
+      if (response.statusCode == 200 && responseData is List) {
+        return {
+          'success': true,
+          'aulas': responseData,
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Error al obtener aulas',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
+
+  // Obtener horarios del alumno
+  static Future<Map<String, dynamic>> getAlumnoHorarios(int idAlumno) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/alumnos_horarios.php?id_alumno=$idAlumno'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return {
+          'success': true,
+          'horarios': responseData['horarios'] ?? [],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Error al obtener horarios',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
+
+  // Obtener recibos/pagos del alumno
+  static Future<Map<String, dynamic>> getAlumnoRecibos(int idAlumno) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/alumnos_recibos.php?id_alumno=$idAlumno'),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return {
+          'success': true,
+          'recibos': responseData['recibos'] ?? [],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Error al obtener recibos',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
 }
