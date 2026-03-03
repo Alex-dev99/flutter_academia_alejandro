@@ -32,7 +32,7 @@ class CampoTexto extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (widgetExtra != null) widgetExtra!,
+              ?widgetExtra,
             ],
           ),
         ),
@@ -42,6 +42,7 @@ class CampoTexto extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.black.withOpacity(0.08),
                 blurRadius: 20,
                 offset: const Offset(0, 4),

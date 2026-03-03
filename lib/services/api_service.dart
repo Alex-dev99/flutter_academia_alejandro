@@ -57,7 +57,6 @@ class ApiService {
     }
   }
 
-  // Login de profesor
   static Future<Map<String, dynamic>> loginProfesor({
     required String email,
     required String password,
@@ -98,7 +97,6 @@ class ApiService {
     }
   }
 
-  // Obtener horarios del profesor
   static Future<Map<String, dynamic>> getProfesorHorarios(int idProfesor) async {
     try {
       final response = await http.get(
@@ -126,7 +124,6 @@ class ApiService {
     }
   }
 
-  // Obtener alumnos del profesor
   static Future<Map<String, dynamic>> getProfesorAlumnos(int idProfesor) async {
     try {
       final response = await http.get(
@@ -154,7 +151,6 @@ class ApiService {
     }
   }
 
-  // Obtener aulas
   static Future<Map<String, dynamic>> getAulas() async {
     try {
       final response = await http.get(
@@ -163,7 +159,6 @@ class ApiService {
 
       final responseData = jsonDecode(response.body);
 
-      // El endpoint aulas.php devuelve directamente un array
       if (response.statusCode == 200 && responseData is List) {
         return {
           'success': true,
@@ -183,7 +178,6 @@ class ApiService {
     }
   }
 
-  // Obtener horarios del alumno
   static Future<Map<String, dynamic>> getAlumnoHorarios(int idAlumno) async {
     try {
       final response = await http.get(
@@ -211,7 +205,6 @@ class ApiService {
     }
   }
 
-  // Obtener recibos/pagos del alumno
   static Future<Map<String, dynamic>> getAlumnoRecibos(int idAlumno) async {
     try {
       final response = await http.get(

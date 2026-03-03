@@ -31,6 +31,7 @@ class TabNavegacion extends StatelessWidget {
             boxShadow: estaSeleccionado
                 ? [
                     BoxShadow(
+                      // ignore: deprecated_member_use
                       color: colorActivo.withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
@@ -38,6 +39,7 @@ class TabNavegacion extends StatelessWidget {
                   ]
                 : [
                     BoxShadow(
+                      // ignore: deprecated_member_use
                       color: Colors.black.withOpacity(0.03),
                       blurRadius: 4,
                       offset: const Offset(0, 1),

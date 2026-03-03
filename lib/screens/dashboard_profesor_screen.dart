@@ -30,7 +30,6 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    // Obtener datos del profesor del BLoC
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated && authState.usuario != null) {
       _idProfesor = authState.usuario!['id'].toString();
@@ -45,7 +44,6 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
       return;
     }
 
-    // Cargar datos en paralelo
     final idProf = int.parse(_idProfesor!);
     final resultHorarios = await ApiService.getProfesorHorarios(idProf);
     final resultAlumnos = await ApiService.getProfesorAlumnos(idProf);
