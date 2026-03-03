@@ -14,14 +14,16 @@ class AuthLoading extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final String username;
   final bool isTeacher;
+  final Map<String, dynamic>? usuario; // Información completa del usuario
 
   const AuthAuthenticated({
     required this.username,
     required this.isTeacher,
+    this.usuario,
   });
 
   @override
-  List<Object> get props => [username, isTeacher];
+  List<Object> get props => [username, isTeacher, usuario ?? {}];
 }
 
 class AuthUnauthenticated extends AuthState {}

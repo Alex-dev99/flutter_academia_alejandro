@@ -116,11 +116,17 @@ class _LoginDocenteScreenState extends State<LoginDocenteScreen> {
         return BotonLogin(
           estaCargando: state is AuthLoading,
           onPress: () {
+            if (_usuarioController.text.isEmpty || _passwordController.text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Por favor completa todos los campos')),
+              );
+              return;
+            }
+            
             context.read<AuthBloc>().add(
-                  LoginEvent(
-                    username: _usuarioController.text,
+                  LoginProfesorEvent(
+                    email: _usuarioController.text,
                     password: _passwordController.text,
-                    isTeacher: true, 
                   ),
                 );
           },
