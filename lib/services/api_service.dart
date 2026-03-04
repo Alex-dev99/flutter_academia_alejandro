@@ -7,12 +7,12 @@ class ApiService {
   // Si estás en PC desktop, usa 127.0.0.1
   static String get baseUrl {
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2/trabajo-Final/Alejandro-proyecto-web/backend/api';
+      return 'http://10.0.2.2/proyectoFinal/Alejandro-proyecto-web/backend/api';
     } else if (Platform.isIOS) {
-      return 'http://127.0.0.1/trabajo-Final/Alejandro-proyecto-web/backend/api';
+      return 'http://127.0.0.1/proyectoFinal/Alejandro-proyecto-web/backend/api';
     } else {
       // Windows, Linux, macOS
-      return 'http://127.0.0.1/trabajo-Final/Alejandro-proyecto-web/backend/api';
+      return 'http://127.0.0.1/proyectoFinal/Alejandro-proyecto-web/backend/api';
     }
   }
 
@@ -32,6 +32,9 @@ class ApiService {
           'password': password,
         }),
       );
+
+      print('STATUS: ${response.statusCode}');
+      print('BODY: ${response.body}');
 
       final responseData = jsonDecode(response.body) as Map<String, dynamic>;
 

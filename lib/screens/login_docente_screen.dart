@@ -75,7 +75,7 @@ class _LoginDocenteScreenState extends State<LoginDocenteScreen> {
                       style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 16),
                     ),
                     const SizedBox(height: 40),
-                    CampoTexto(etiqueta: 'Username or Email', controlador: _usuarioController),
+                    CampoTexto(etiqueta: 'Email', controlador: _usuarioController),
                     const SizedBox(height: 20),
                     CampoTexto(etiqueta: 'Password', controlador: _passwordController, esPassword: true),
                     const SizedBox(height: 32),

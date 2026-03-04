@@ -14,7 +14,7 @@ class DashboardProfesorScreen extends StatefulWidget {
 }
 
 class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
-  int _tabSeleccionado = 1;
+  int _tabSeleccionado = 0;
   List<dynamic> _horarios = [];
   List<dynamic> _alumnos = [];
   List<dynamic> _aulas = [];
