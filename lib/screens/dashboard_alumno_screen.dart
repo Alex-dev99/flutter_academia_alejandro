@@ -248,10 +248,12 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
           ..._recibos.map((recibo) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: TarjetaPago(
+              idRecibo: recibo['id_recibo'] is int ? recibo['id_recibo'] : int.tryParse(recibo['id_recibo']?.toString() ?? '') ?? 0,
               concepto: recibo['mes'] ?? 'Pago',
               monto: '\$${recibo['importe']}',
               fecha: _formatearFecha(recibo['fecha_emision']),
               estado: recibo['estado'] ?? 'Desconocido',
+              onPagar: (id) => _pagarRecibo(id),
             ),
           )),
         ],
@@ -268,21 +270,50 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
       return fecha;
     }
   }
+
+  Future<void> _pagarRecibo(int idRecibo) async {
+    setState(() {
+      _cargando = true;
+    });
+    
+    final result = await ApiService.marcarReciboPagado(idRecibo);
+    
+    if (!mounted) return;
+    
+    if (result['success']) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pago realizado con éxito'), backgroundColor: Colors.green),
+      );
+      _cargarDatos(); // Recarga y quita _cargando automáticamente
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Error al pagar'), backgroundColor: Colors.red),
+      );
+      setState(() {
+        _cargando = false;
+      });
+    }
+  }
 }
 
 class TarjetaPago extends StatelessWidget {
+  final int idRecibo;
   final String concepto, monto, fecha, estado;
+  final Function(int) onPagar;
+
   const TarjetaPago({
     super.key,
+    required this.idRecibo,
     required this.concepto,
     required this.monto,
     required this.fecha,
     required this.estado,
+    required this.onPagar,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool pagado = estado == 'Pagado';
+    final bool pagado = estado.toLowerCase() == 'pagado';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -321,6 +352,19 @@ class TarjetaPago extends StatelessWidget {
                   ),
                 ),
               ),
+              if (!pagado) ...[
+                const SizedBox(height: 8),
+                ElevatedButton(
+                  onPressed: () => onPagar(idRecibo),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF05A3C7),
+                    minimumSize: const Size(60, 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('Pagar', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ],
           ),
         ],

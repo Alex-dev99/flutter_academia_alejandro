@@ -234,4 +234,37 @@ class ApiService {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> marcarReciboPagado(int idRecibo) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/marcar_recibo_pagado.php'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'id_recibo': idRecibo,
+        }),
+      );
+
+      final responseData = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200 && responseData['success'] == true) {
+        return {
+          'success': true,
+          'message': responseData['message'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Error al marcar recibo',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error de conexión: $e',
+      };
+    }
+  }
 }

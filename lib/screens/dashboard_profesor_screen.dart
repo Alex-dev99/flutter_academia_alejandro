@@ -22,6 +22,34 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
   String? _idProfesor;
   String? _nombreProfesor;
   String? _materiasProfesor;
+  DateTime _fechaSeleccionada = DateTime.now();
+
+  String _getDiaSemanaString(DateTime date) {
+    const dias = [
+      'Lunes',
+      'Martes',
+      'Miércoles',
+      'Jueves',
+      'Viernes',
+      'Sábado',
+      'Domingo'
+    ];
+    return dias[date.weekday - 1];
+  }
+
+  Future<void> _seleccionarFecha(BuildContext context) async {
+    final DateTime? fecha = await showDatePicker(
+      context: context,
+      initialDate: _fechaSeleccionada,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (fecha != null && fecha != _fechaSeleccionada) {
+      setState(() {
+        _fechaSeleccionada = fecha;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -233,39 +261,105 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
   }
 
   Widget _buildHorarioProfesor() {
-    if (_horarios.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.calendar_today, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text(
-              'No hay horarios registrados',
-              style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
-            ),
-          ],
-        ),
-      );
-    }
+    final String diaSemana = _getDiaSemanaString(_fechaSeleccionada);
+    final List<dynamic> horariosDelDia = _horarios.where((h) {
+      final String dia = h['dia_semana']?.toString() ?? '';
+      return dia.trim().toLowerCase() == diaSemana.toLowerCase();
+    }).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Mi Horario', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text('Mi horario de Hoy', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              InkWell(
+                onTap: () => _seleccionarFecha(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        '${_fechaSeleccionada.day.toString().padLeft(2, '0')}/${_fechaSeleccionada.month.toString().padLeft(2, '0')}/${_fechaSeleccionada.year}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.keyboard_arrow_down, size: 20),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: horariosDelDia.map((h) {
+                      String hora = h['hora_inicio']?.toString() ?? '';
+                      if (hora.length >= 5) hora = hora.substring(0, 5);
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6B7280),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          hora,
+                          style: const TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
-          ..._horarios.map((horario) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: TarjetaClaseProfesor(
-              dia: horario['dia_semana'] ?? '',
-              hora: '${horario['hora_inicio']} - ${horario['hora_fin']}',
-              materia: horario['materia'] ?? 'Materia',
-              aula: horario['aula_nombre'] ?? 'Aula',
-              grupo: '${horario['alumno_nombre']} ${horario['alumno_apellidos']}',
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
             ),
-          )),
+            child: Text(
+              diaSemana.toUpperCase(),
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2),
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (horariosDelDia.isEmpty)
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32),
+                child: Column(
+                  children: [
+                    Icon(Icons.calendar_today, size: 48, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
+                    Text(
+                      'No hay clases programadas para este día',
+                      style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else
+            ...horariosDelDia.map((horario) => TarjetaClaseProfesor(
+              horaInicio: horario['hora_inicio']?.toString() ?? '',
+              horaFin: horario['hora_fin']?.toString() ?? '',
+              alumno: '${horario['alumno_nombre']} ${horario['alumno_apellidos']}',
+              materia: horario['materia']?.toString() ?? 'Materia',
+              aula: horario['aula_nombre']?.toString() ?? 'Aula',
+            )),
         ],
       ),
     );
@@ -349,34 +443,61 @@ class _DashboardProfesorScreenState extends State<DashboardProfesorScreen> {
 
 
 class TarjetaClaseProfesor extends StatelessWidget {
-  final String dia, hora, materia, aula, grupo;
+  final String horaInicio, horaFin, alumno, materia, aula;
   const TarjetaClaseProfesor({
     super.key,
-    required this.dia,
-    required this.hora,
+    required this.horaInicio,
+    required this.horaFin,
+    required this.alumno,
     required this.materia,
     required this.aula,
-    required this.grupo,
   });
 
   @override
   Widget build(BuildContext context) {
+    String horaFormateada = horaInicio;
+    if (horaInicio.length >= 5) {
+      horaFormateada = horaInicio.substring(0, 5);
+    }
+
     return Container(
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
         children: [
-          Text('$dia • $hora',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF9333EA))),
-          const SizedBox(height: 8),
-          Text(materia, style: const TextStyle(fontSize: 16)),
-          const SizedBox(height: 4),
-          Text('Aula: $aula • $grupo', style: TextStyle(color: Colors.grey.shade600)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF6B7280),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              horaFormateada,
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    alumno,
+                    style: const TextStyle(
+                      fontSize: 16, 
+                      color: Colors.green,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.person, color: Colors.green, size: 20),
+              ],
+            ),
+          ),
         ],
       ),
     );
