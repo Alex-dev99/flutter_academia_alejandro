@@ -140,7 +140,7 @@ class _LoginAlumnoScreenState extends State<LoginAlumnoScreen> {
     return Column(
       children: [
         CampoTexto(
-          etiqueta: 'Username or Email',
+          etiqueta: 'Email',
           controlador: _usuarioController,
         ),
         

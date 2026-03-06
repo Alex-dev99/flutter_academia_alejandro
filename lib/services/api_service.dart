@@ -3,20 +3,16 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 
 class ApiService {
-  // Para Android emulator usa 10.0.2.2, para dispositivo físico o iOS usa localhost
-  // Si estás en PC desktop, usa 127.0.0.1
   static String get baseUrl {
     if (Platform.isAndroid) {
       return 'http://10.0.2.2/proyectoFinal/Alejandro-proyecto-web/backend/api';
     } else if (Platform.isIOS) {
       return 'http://127.0.0.1/proyectoFinal/Alejandro-proyecto-web/backend/api';
     } else {
-      // Windows, Linux, macOS
       return 'http://127.0.0.1/proyectoFinal/Alejandro-proyecto-web/backend/api';
     }
   }
 
-  // Login de alumno
   static Future<Map<String, dynamic>> loginAlumno({
     required String emailONombre,
     required String password,

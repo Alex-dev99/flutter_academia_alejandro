@@ -14,7 +14,7 @@ class AuthLoading extends AuthState {}
 class AuthAuthenticated extends AuthState {
   final String username;
   final bool isTeacher;
-  final Map<String, dynamic>? usuario; // Información completa del usuario
+  final Map<String, dynamic>? usuario;
 
   const AuthAuthenticated({
     required this.username,

@@ -29,7 +29,6 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
   }
 
   Future<void> _cargarDatos() async {
-    // Obtener datos del alumno del BLoC
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated && authState.usuario != null) {
       _idAlumno = authState.usuario!['id'].toString();
@@ -284,7 +283,7 @@ class _DashboardAlumnoScreenState extends State<DashboardAlumnoScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pago realizado con éxito'), backgroundColor: Colors.green),
       );
-      _cargarDatos(); // Recarga y quita _cargando automáticamente
+      _cargarDatos();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(result['message'] ?? 'Error al pagar'), backgroundColor: Colors.red),
